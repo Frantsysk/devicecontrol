@@ -1,3 +1,7 @@
-from django.shortcuts import render
+from django.http import HttpResponse, JsonResponse
 
-# Create your views here.
+
+def api_test(request):
+    content = {'ok': True, 'word': 'Hello World'}
+    return JsonResponse(content)
+
