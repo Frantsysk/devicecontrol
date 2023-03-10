@@ -8,7 +8,7 @@ class DeviceAdmin(admin.ModelAdmin):
 
 
 class DeviceInfoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'device', 'cpu_load', 'memory_usage', 'disk_usage', 'timestamp')
+    list_display = ('id', 'device', 'ip_address', 'country', 'cpu_load', 'memory_usage', 'disk_usage', 'timestamp')
     list_display_links = ('id', 'device')
 
 

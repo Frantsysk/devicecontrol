@@ -35,7 +35,9 @@ def dev_info(request):
                               cpu_temp=data.get('cpu_temp'),
                               cpu_load=data.get('cpu_load'),
                               memory_usage=data.get('memory_usage'),
-                              disk_usage=data.get('disk_usage')
+                              disk_usage=data.get('disk_usage'),
+                              ip_address=data.get('ip_address'),
+                              country=data.get('country'),
                               )
     return JsonResponse({"status": True})
 

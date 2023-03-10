@@ -17,6 +17,8 @@ class DeviceInfo(models.Model):
     cpu_load = models.FloatField(null=True)
     memory_usage = models.FloatField(null=True)
     disk_usage = models.FloatField(null=True)
+    ip_address = models.CharField(max_length=20, null=True)
+    country = models.CharField(max_length=50, null=True)
 
 
 
