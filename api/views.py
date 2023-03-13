@@ -4,6 +4,8 @@ from django.shortcuts import get_object_or_404
 from django.db.utils import IntegrityError
 import json
 from .models import Device, DeviceInfo
+from django.db.models import Subquery, OuterRef
+from django.core import serializers
 
 
 def api_test(request):
@@ -18,7 +20,6 @@ def first_reg(request):
             data = json.loads(request.body)
             dev = Device(account=data['account'], serial=data['serial'], os=data['os'])
             dev.save()
-            # Device.objects.create(account=data['account'], serial=data['serial'], os=data['os'])
         except Exception as er:
             return JsonResponse({'status': False, 'error': er.args[0]})
         else:
@@ -40,6 +41,25 @@ def dev_info(request):
                               country=data.get('country'),
                               )
     return JsonResponse({"status": True})
+
+
+@csrf_exempt
+def show_status(request):
+    devices = Device.objects.all()
+    device_data = []
+    for device in devices:
+        last_info = device.deviceinfo_set.latest('timestamp')
+        data = {
+            'device__account': last_info.device.account,
+            'device__serial': last_info.device.serial,
+            'device__os': last_info.device.os,
+            'cpu_temp': last_info.cpu_temp,
+            'ip_address': last_info.ip_address
+        }
+        device_data.append(data)
+    return JsonResponse(device_data, safe=False)
+
+
 
 
 
