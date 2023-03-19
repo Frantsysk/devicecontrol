@@ -2,43 +2,45 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-from django.http import JsonResponse
-from django.views.decorators.csrf import ensure_csrf_cookie
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from django.middleware.csrf import get_token
-from django.views.decorators.http import require_POST
+from rest_framework.authtoken.models import Token
 
 
+@api_view(['GET'])
 def csrf(request):
     csrf_token = get_token(request)
-    return JsonResponse({'csrfToken': csrf_token})
+    return Response({'csrfToken': csrf_token})
 
 
-@require_POST
+@api_view(['POST'])
 def login_view(request):
-    username = request.POST.get('username')
-    print(username)
-    password = request.POST.get('password')
-    print(password)
+    username = request.data.get('username')
+    password = request.data.get('password')
     user = authenticate(request, username=username, password=password)
     if user is not None:
         login(request, user)
-        return JsonResponse({'status': 'success'})
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'status': 'success', 'token': token.key})
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid username or password. Keke'})
+        return Response({'status': 'error', 'message': 'Invalid username or password.'})
 
 
+@api_view(['POST'])
 def logout_view(request):
+    request.user.auth_token.delete()
     logout(request)
-    return redirect('login')
+    return Response({'status': 'success'})
 
 
+@api_view(['POST'])
 def register_view(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('dashboard')
+    form = UserCreationForm(request.data)
+    if form.is_valid():
+        user = form.save()
+        login(request, user)
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'status': 'success', 'token': token.key})
     else:
-        form = UserCreationForm()
-    return render(request, 'login/register.html', {'form': form})
+        return Response({'status': 'error', 'errors': form.errors})
